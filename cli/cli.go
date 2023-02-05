@@ -18,7 +18,7 @@ type Command struct {
 	Name          string
 	FlagSet       []Flag
 	Description   string
-	SubCommandSet []CommandInterface
+	SubCommands []CommandInterface
 	Handler       CommandHandlerFunc
 }
 
@@ -34,8 +34,8 @@ func (c *Command) CommandDescription() string {
 	return c.Description
 }
 
-func (c *Command) SubCommands() []CommandInterface {
-	return c.SubCommandSet
+func (c *Command) Commands() []CommandInterface {
+	return c.SubCommands
 }
 
 func (c *Command) HandlerFunc() CommandHandlerFunc {
