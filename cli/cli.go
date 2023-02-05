@@ -15,11 +15,11 @@ type CommandInterface interface {
 }
 
 type Command struct {
-	Name          string
-	FlagSet       []Flag
-	Description   string
+	Name        string
+	FlagSet     []Flag
+	Description string
 	SubCommands []CommandInterface
-	Handler       CommandHandlerFunc
+	Handler     CommandHandlerFunc
 }
 
 func (c *Command) CommandName() string {
@@ -45,7 +45,7 @@ func (c *Command) HandlerFunc() CommandHandlerFunc {
 type JacliInterface interface {
 	CommandInterface
 
-	Run() []error
+	Run([]string) []error
 }
 type CLI struct {
 	GlobalFlags []Flag
@@ -66,8 +66,8 @@ func (cli *CLI) CommandDescription() string {
 	return cli.Description
 }
 
-func (cli *CLI) Run() []error {
-	return ParseInput(cli, os.Args[1:])
+func (cli *CLI) Run(args []string) []error {
+	return ParseInput(cli, args)
 }
 
 func (cli *CLI) Flags() []Flag {
@@ -103,7 +103,11 @@ func parseSubCommand(cmd CommandInterface, iterator *ArgsIterator, extraFlags []
 		return errs
 	}
 
-	cmd.HandlerFunc()(flags)
+	h := cmd.HandlerFunc()
+	if h != nil {
+		h(flags)
+	}
+
 	return nil
 }
 
