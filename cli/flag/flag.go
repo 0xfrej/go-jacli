@@ -2,7 +2,6 @@ package flag
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"github.com/lai0n/go-jacli/cli/arg"
 	"github.com/lai0n/go-jacli/pkg/iterator"
@@ -15,15 +14,22 @@ var (
 
 type ParseCtx struct {
 	args  iterator.Iterator[*arg.CommandArg]
-	flags map[string]flag.Flag
+	flags map[string]Flag
 }
 
 func (c *ParseCtx) Args() iterator.Iterator[*arg.CommandArg] {
 	return c.args
 }
 
-func (c *ParseCtx) Flags() map[string]flag.Flag {
+func (c *ParseCtx) Flags() map[string]Flag {
 	return c.flags
+}
+
+func NewParseCtx(args iterator.Iterator[*arg.CommandArg], flags map[string]Flag) *ParseCtx {
+	return &ParseCtx{
+		args:  args,
+		flags: flags,
+	}
 }
 
 type Flag interface {

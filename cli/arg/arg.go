@@ -20,6 +20,10 @@ func (a *CommandArg) IsFlag() bool {
 	return a.hyphenCount > 0
 }
 
+func (a *CommandArg) HyphenCount() uint8 {
+	return a.hyphenCount
+}
+
 func newArg(str *string) *CommandArg {
 	hyphenCount := uint8(0)
 	for _, char := range *str {

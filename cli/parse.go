@@ -9,8 +9,8 @@ import (
 )
 
 func parse(ctx *Ctx, iter iterator.Iterator[*arg.CommandArg]) []error {
-	if arg, ok := iter.Peek(); ok && !arg.IsFlag() {
-		if cmd := findCommandByName(arg.String(), ctx.CurrentCommand().Commands()); cmd != nil {
+	if a, ok := iter.Peek(); ok && !a.IsFlag() {
+		if cmd := findCommandByName(a.String(), ctx.CurrentCommand().Commands()); cmd != nil {
 			iter.Next()
 			ctx.setCurrentCommand(cmd)
 			parse(ctx, iter)
@@ -47,10 +47,7 @@ func parseFlags(flags []flag.Flag, runCtx *Ctx, iter iterator.Iterator[*arg.Comm
 	}
 	runCtx.setFlags(flagMap)
 
-	ctx := &ParseCtx{
-		args:  iter,
-		flags: flagMap,
-	}
+	ctx := flag.NewParseCtx(iter, flagMap)
 
 	var errorSet []error
 	applyFlag := func(flagName string) {
@@ -60,19 +57,19 @@ func parseFlags(flags []flag.Flag, runCtx *Ctx, iter iterator.Iterator[*arg.Comm
 	}
 
 	var valueSet []string
-	for ctx.args.HasNext() {
-		if arg, ok := ctx.args.Next(); ok {
-			if arg.IsFlag() {
+	for ctx.Args().HasNext() {
+		if a, ok := ctx.Args().Next(); ok {
+			if a.IsFlag() {
 				// when hyphen count equals one treat every character as a flag name.
-				if arg.hyphenCount == 1 {
-					for _, flagName := range arg.String() {
+				if a.HyphenCount() == 1 {
+					for _, flagName := range a.String() {
 						applyFlag(string(flagName))
 					}
 				} else {
-					applyFlag(arg.String())
+					applyFlag(a.String())
 				}
 			} else {
-				valueSet = append(valueSet, arg.String())
+				valueSet = append(valueSet, a.String())
 			}
 		}
 	}
