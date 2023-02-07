@@ -1,7 +1,8 @@
-package cli
+package flag
 
 import (
 	"fmt"
+	"github.com/lai0n/go-jacli/cli"
 	"os"
 	"testing"
 
@@ -21,19 +22,19 @@ func TestStringFlag_Apply(t *testing.T) {
 	ctx := newCtx(t, []string{})
 
 	t.Run("it panics when there is no other argument", func(t *testing.T) {
-		err := flag.apply(ctx)
+		err := flag.Apply(ctx)
 		test.AssertErrSame(t, fmt.Errorf("flag '%s' requires a parameter", flag.Names[0]), err)
 	})
 
 	resetCtx(t, ctx, []string{"--kek"})
 	t.Run("it panics when there next argument is not a string", func(t *testing.T) {
-		err := flag.apply(ctx)
+		err := flag.Apply(ctx)
 		test.AssertErrSame(t, fmt.Errorf("flag '%s' requires a parameter", flag.Names[0]), err)
 	})
 
 	resetCtx(t, ctx, []string{testValue, testValue2})
 	t.Run("it applies and consumes next argument used as value", func(t *testing.T) {
-		err := flag.apply(ctx)
+		err := flag.Apply(ctx)
 		test.AssertNil(t, err)
 		test.AssertEquals(t, testValue, flag.value)
 
@@ -47,13 +48,13 @@ func TestStringFlag_Apply(t *testing.T) {
 	resetCtx(t, ctx, []string{notPath})
 	t.Run("it sets", func(t *testing.T) {
 		// should fail
-		err := flag.apply(ctx)
+		err := flag.Apply(ctx)
 		test.AssertErrSame(t, fmt.Errorf("path '%s' does not exist", notPath), err)
 
 		// should pass
 		file := createTestFile(t)
 		resetCtx(t, ctx, []string{file.Name()})
-		err = flag.apply(ctx)
+		err = flag.Apply(ctx)
 		test.AssertNil(t, err)
 		test.AssertEquals(t, file.Name(), flag.value)
 		file.Close()
@@ -97,20 +98,22 @@ func TestStringFlag_Value(t *testing.T) {
 	})
 }
 
-func newCtx(t *testing.T, args []string) *Ctx {
+func newCtx(t *testing.T, args []string) *cli.ParseCtx {
 	t.Helper()
-	return &Ctx{
-		Args: &ArgsIterator{
+	return &cli.ParseCtx{
+		Args: &cli.argsIterator{
 			Args:          args,
 			iteratorIndex: -1,
 		},
 	}
 }
 
-func resetCtx(t *testing.T, ctx *Ctx, args []string) {
+func resetCtx(t *testing.T, ctx *cli.ParseCtx, args []string) {
 	t.Helper()
-	ctx.Args.Args = args
-	ctx.Args.iteratorIndex = -1
+	ctx.Args = &cli.argsIterator{
+		Args:          args,
+		iteratorIndex: -1,
+	}
 }
 
 func createTestFile(t *testing.T) *os.File {

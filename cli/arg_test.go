@@ -55,7 +55,7 @@ func TestCommandArg_newArg(t *testing.T) {
 }
 
 func TestArgsIterator_HasNext(t *testing.T) {
-	iter := ArgsIterator{iteratorIndex: -1}
+	iter := argsIterator{iteratorIndex: -1}
 	t.Run("it returns false on empty array", func(t *testing.T) {
 		test.AssertFalse(t, iter.HasNext())
 	})
@@ -77,7 +77,7 @@ func TestArgsIterator_HasNext(t *testing.T) {
 }
 
 func TestArgsIterator_Peek(t *testing.T) {
-	iter := ArgsIterator{iteratorIndex: -1}
+	iter := argsIterator{iteratorIndex: -1}
 	t.Run("it returns nok on empty array", func(t *testing.T) {
 		_, ok := iter.Peek()
 		test.AssertFalse(t, ok)
@@ -108,7 +108,7 @@ func TestArgsIterator_Peek(t *testing.T) {
 }
 
 func TestArgsIterator_Next(t *testing.T) {
-	iter := ArgsIterator{iteratorIndex: -1}
+	iter := argsIterator{iteratorIndex: -1}
 	t.Run("it returns nok on empty array", func(t *testing.T) {
 		_, ok := iter.Next()
 		test.AssertFalse(t, ok)
@@ -141,7 +141,7 @@ func TestArgsIterator_Next(t *testing.T) {
 func TestNewArgsIterator(t *testing.T) {
 	args := []string{argFlag}
 
-	iter := newArgsIterator(args)
+	iter := newArgIterator(args)
 	t.Run("it constructs iterator correctly", func(t *testing.T) {
 		want := args
 		if !reflect.DeepEqual(want, iter.Args) {
