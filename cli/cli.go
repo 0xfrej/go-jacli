@@ -3,14 +3,13 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/lai0n/go-jacli/cli/arg"
 	"github.com/lai0n/go-jacli/cli/flag"
 )
 
 var (
 	FlagNotFound = errors.New("flag not found")
 )
-
-var nilResult = Result{}
 
 type Ctx struct {
 	flagMap        map[string]flag.Flag
@@ -138,7 +137,15 @@ func (r *Result) Errors() []error {
 }
 
 func NilResult() Result {
-	return nilResult
+	return Result{}
+}
+
+func ErrResult(err []error) Result {
+	return Result{errors: err}
+}
+
+func ValueResult(v any) Result {
+	return Result{value: v}
 }
 
 type CLI struct {
@@ -158,7 +165,7 @@ func (cli *CLI) CommandDescription() string {
 }
 
 func (cli *CLI) Run(args []string) Result {
-	iter := newArgIterator(args)
+	iter := arg.NewArgIterator(args)
 
 	ctx := newCliCtx(nil, cli)
 	errs := parse(ctx, iter)

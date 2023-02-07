@@ -1,23 +1,9 @@
-package cli
+package arg
 
 import (
 	"fmt"
-	"github.com/lai0n/go-jacli/cli/flag"
 	"github.com/lai0n/go-jacli/pkg/iterator"
 )
-
-type ParseCtx struct {
-	args  iterator.Iterator[*CommandArg]
-	flags map[string]flag.Flag
-}
-
-func (c *ParseCtx) Args() iterator.Iterator[*CommandArg] {
-	return c.args
-}
-
-func (c *ParseCtx) Flags() map[string]flag.Flag {
-	return c.flags
-}
 
 type CommandArg struct {
 	fmt.Stringer
@@ -79,7 +65,7 @@ func (a *argsIterator) Peek() (elem *CommandArg, ok bool) {
 	return nil, false
 }
 
-func newArgIterator(argSet []string) iterator.Iterator[*CommandArg] {
+func NewArgIterator(argSet []string) iterator.Iterator[*CommandArg] {
 	return &argsIterator{
 		Args:          argSet,
 		iteratorIndex: -1,

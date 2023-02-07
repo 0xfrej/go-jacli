@@ -3,11 +3,12 @@ package cli
 import (
 	"errors"
 	"fmt"
+	"github.com/lai0n/go-jacli/cli/arg"
 	"github.com/lai0n/go-jacli/cli/flag"
 	"github.com/lai0n/go-jacli/pkg/iterator"
 )
 
-func parse(ctx *Ctx, iter iterator.Iterator[*CommandArg]) []error {
+func parse(ctx *Ctx, iter iterator.Iterator[*arg.CommandArg]) []error {
 	if arg, ok := iter.Peek(); ok && !arg.IsFlag() {
 		if cmd := findCommandByName(arg.String(), ctx.CurrentCommand().Commands()); cmd != nil {
 			iter.Next()
@@ -39,7 +40,7 @@ func findCommandByName(needle string, haystack []CommandInterface) CommandInterf
 	return nil
 }
 
-func parseFlags(flags []flag.Flag, runCtx *Ctx, iter iterator.Iterator[*CommandArg]) []error {
+func parseFlags(flags []flag.Flag, runCtx *Ctx, iter iterator.Iterator[*arg.CommandArg]) []error {
 	flagMap, err := buildFlagMap(flags)
 	if err != nil {
 		return []error{err}

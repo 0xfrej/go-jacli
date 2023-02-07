@@ -2,8 +2,10 @@ package flag
 
 import (
 	"errors"
+	"flag"
 	"fmt"
-	"github.com/lai0n/go-jacli/cli"
+	"github.com/lai0n/go-jacli/cli/arg"
+	"github.com/lai0n/go-jacli/pkg/iterator"
 	"strconv"
 )
 
@@ -11,11 +13,24 @@ var (
 	FlagImpossibleToCast = errors.New("not a value flag")
 )
 
+type ParseCtx struct {
+	args  iterator.Iterator[*arg.CommandArg]
+	flags map[string]flag.Flag
+}
+
+func (c *ParseCtx) Args() iterator.Iterator[*arg.CommandArg] {
+	return c.args
+}
+
+func (c *ParseCtx) Flags() map[string]flag.Flag {
+	return c.flags
+}
+
 type Flag interface {
 	NameList() []string
 	IsSet() bool
 	IsRequired() bool
-	Apply(*cli.ParseCtx) error
+	Apply(*ParseCtx) error
 }
 
 type ValueFlag[T any] interface {
@@ -62,14 +77,14 @@ func (f *StringFlag) IsRequired() bool {
 	return f.Required
 }
 
-func (f *StringFlag) Apply(ctx *cli.ParseCtx) error {
-	arg, ok := ctx.Args().Peek()
-	if !ok || arg.IsFlag() {
+func (f *StringFlag) Apply(ctx *ParseCtx) error {
+	a, ok := ctx.Args().Peek()
+	if !ok || a.IsFlag() {
 		return fmt.Errorf("flag '%s' requires a parameter", f.Names[0])
 	}
 
 	ctx.Args().Next() // take next argument
-	f.value = arg.String()
+	f.value = a.String()
 
 	return nil
 }
@@ -97,7 +112,7 @@ func (f *BoolFlag) IsRequired() bool {
 	return false
 }
 
-func (f *BoolFlag) Apply(_ *cli.ParseCtx) error {
+func (f *BoolFlag) Apply(_ *ParseCtx) error {
 	f.value = true
 	return nil
 }
@@ -127,16 +142,16 @@ func (f *IntFlag) IsRequired() bool {
 	return f.Required
 }
 
-func (f *IntFlag) Apply(ctx *cli.ParseCtx) error {
-	arg, ok := ctx.Args().Peek()
-	if !ok || arg.IsFlag() {
+func (f *IntFlag) Apply(ctx *ParseCtx) error {
+	a, ok := ctx.Args().Peek()
+	if !ok || a.IsFlag() {
 		return fmt.Errorf("flag '%s' requires a parameter", f.Names[0])
 	}
 
 	ctx.Args().Next() // take next argument
-	v, e := strconv.Atoi(arg.String())
+	v, e := strconv.Atoi(a.String())
 	if e != nil {
-		return fmt.Errorf("flag '%s' contains invalid integer '%v'", f.Names[0], arg.String())
+		return fmt.Errorf("flag '%s' contains invalid integer '%v'", f.Names[0], a.String())
 	}
 	f.value = v
 	f.wasSet = true
@@ -168,16 +183,16 @@ func (f *Float32Flag) IsRequired() bool {
 	return f.Required
 }
 
-func (f *Float32Flag) Apply(ctx *cli.ParseCtx) error {
-	arg, ok := ctx.Args().Peek()
-	if !ok || arg.IsFlag() {
+func (f *Float32Flag) Apply(ctx *ParseCtx) error {
+	a, ok := ctx.Args().Peek()
+	if !ok || a.IsFlag() {
 		return fmt.Errorf("flag '%s' requires a parameter", f.Names[0])
 	}
 
 	ctx.Args().Next() // take next argument
-	v, e := strconv.ParseFloat(arg.String(), 32)
+	v, e := strconv.ParseFloat(a.String(), 32)
 	if e != nil {
-		return fmt.Errorf("flag '%s' contains invalid float '%v'", f.Names[0], arg.String())
+		return fmt.Errorf("flag '%s' contains invalid float '%v'", f.Names[0], a.String())
 	}
 	f.value = float32(v)
 	f.wasSet = true
@@ -209,16 +224,16 @@ func (f *Float64Flag) IsRequired() bool {
 	return f.Required
 }
 
-func (f *Float64Flag) Apply(ctx *cli.ParseCtx) error {
-	arg, ok := ctx.Args().Peek()
-	if !ok || arg.IsFlag() {
+func (f *Float64Flag) Apply(ctx *ParseCtx) error {
+	a, ok := ctx.Args().Peek()
+	if !ok || a.IsFlag() {
 		return fmt.Errorf("flag '%s' requires a parameter", f.Names[0])
 	}
 
 	ctx.Args().Next() // take next argument
-	v, e := strconv.ParseFloat(arg.String(), 64)
+	v, e := strconv.ParseFloat(a.String(), 64)
 	if e != nil {
-		return fmt.Errorf("flag '%s' contains invalid float '%v'", f.Names[0], arg.String())
+		return fmt.Errorf("flag '%s' contains invalid float '%v'", f.Names[0], a.String())
 	}
 	f.value = v
 	f.wasSet = true
