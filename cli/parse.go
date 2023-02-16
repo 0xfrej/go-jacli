@@ -9,15 +9,17 @@ import (
 )
 
 func parse(ctx *Ctx, iter iterator.Iterator[*arg.CommandArg]) []error {
+	commands := append(ctx.globalCommands, ctx.CurrentCommand().Commands()...)
+	ctx.commandChain = commands
 	if a, ok := iter.Peek(); ok && !a.IsFlag() {
-		if cmd := findCommandByName(a.String(), ctx.CurrentCommand().Commands()); cmd != nil {
+		if cmd := findCommandByName(a.String(), commands); cmd != nil {
 			iter.Next()
 			ctx.setCurrentCommand(cmd)
 			parse(ctx, iter)
 		}
 	}
 
-	flags := append(ctx.RootCommand().Flags(), ctx.CurrentCommand().Flags()...)
+	flags := append(ctx.globalFlags, ctx.CurrentCommand().Flags()...)
 	errs := parseFlags(flags, ctx, iter)
 	if errs != nil {
 		return errs
@@ -52,7 +54,10 @@ func parseFlags(flags []flag.Flag, runCtx *Ctx, iter iterator.Iterator[*arg.Comm
 	var errorSet []error
 	applyFlag := func(flagName string) {
 		if f, ok := flagMap[flagName]; ok {
-			errorSet = append(errorSet, f.Apply(ctx))
+			err = f.Apply(ctx)
+			if err != nil {
+				errorSet = append(errorSet, err)
+			}
 		}
 	}
 
